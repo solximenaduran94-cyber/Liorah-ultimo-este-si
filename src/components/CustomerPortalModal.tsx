@@ -90,7 +90,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
             ¿Tenés alguna consulta o cambio en tus textos?
           </p>
           <a
-            href="https://wa.me/5491123456789?text=Hola%20LIORAH%20STUDIO!%20Quiero%20consultar%20sobre%20mi%20pedido"
+            href="https://wa.me/5491178974625?text=Hola%20LIORAH%20STUDIO!%20Quiero%20consultar%20sobre%20mi%20pedido"
             target="_blank"
             rel="noreferrer"
             className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"

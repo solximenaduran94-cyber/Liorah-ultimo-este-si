@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Trash2, ArrowRight, MessageCircle, Sparkles, Check, Heart, ShieldCheck } from 'lucide-react';
+import { X, Trash2, ArrowRight, MessageCircle, Sparkles, Check, Heart, ShieldCheck, Globe } from 'lucide-react';
 import { StoreProductItem } from './StoreProductCard';
 import { LiorahPackageTier, LIORAH_PACKAGES } from '../types';
+import { SupportedCurrency, CURRENCIES, formatPrice } from '../utils/currency';
 
 export interface CartItem {
   product: StoreProductItem;
@@ -16,6 +17,8 @@ interface QuickCartDrawerProps {
   onUpdateTier: (productId: string, tier: LiorahPackageTier) => void;
   onRemoveItem: (productId: string) => void;
   onCheckout: () => void;
+  currency?: SupportedCurrency;
+  onOpenCurrencyModal?: () => void;
 }
 
 export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
@@ -25,19 +28,23 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
   onUpdateTier,
   onRemoveItem,
   onCheckout,
+  currency = 'ARS',
+  onOpenCurrencyModal,
 }) => {
   const [coupon, setCoupon] = useState('LIORAH10');
   const [discountApplied, setDiscountApplied] = useState(true);
 
   if (!isOpen) return null;
 
-  const subtotal = cartItems.reduce((acc, item) => {
+  const currencyInfo = CURRENCIES[currency] || CURRENCIES.ARS;
+
+  const subtotalArs = cartItems.reduce((acc, item) => {
     const tierPrice = LIORAH_PACKAGES[item.tier]?.price || item.product.price;
     return acc + tierPrice * item.quantity;
   }, 0);
 
-  const discount = discountApplied && subtotal > 0 ? Math.round(subtotal * 0.1) : 0;
-  const total = Math.max(0, subtotal - discount);
+  const discountArs = discountApplied && subtotalArs > 0 ? Math.round(subtotalArs * 0.1) : 0;
+  const totalArs = Math.max(0, subtotalArs - discountArs);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,12 +58,13 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
       cartItems
         .map(
           (i) =>
-            `• ${i.product.name} (${LIORAH_PACKAGES[i.tier].title}) - $${(
-              LIORAH_PACKAGES[i.tier].price
-            ).toLocaleString('es-AR')}`
+            `• ${i.product.name} (${LIORAH_PACKAGES[i.tier].title}) - ${formatPrice(
+              LIORAH_PACKAGES[i.tier].price,
+              currency
+            )}`
         )
         .join('\n') +
-      `\nTotal: $${total.toLocaleString('es-AR')} ARS (con cupón 10% OFF aplicado). ¡Les paso los datos del evento!`
+      `\nTotal: ${formatPrice(totalArs, currency)} (con cupón 10% OFF aplicado). ¡Les paso los datos del evento!`
   );
 
   return (
@@ -72,9 +80,23 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[#E5D7C5] bg-[#FAF6F0]">
           <div>
-            <span className="font-prestige text-xs uppercase tracking-[0.2em] font-bold text-[#1A1A1A]">
-              Tu Bolsa de Compras
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-prestige text-xs uppercase tracking-[0.2em] font-bold text-[#1A1A1A]">
+                Tu Bolsa de Compras
+              </span>
+              {onOpenCurrencyModal && (
+                <button
+                  type="button"
+                  onClick={onOpenCurrencyModal}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFFDF9] border border-[#E5D7C5] hover:border-[#C5A059] text-[10px] font-semibold text-[#1A1A1A] cursor-pointer"
+                  title="Cambiar moneda"
+                >
+                  <span>{currencyInfo.flag}</span>
+                  <span>{currency}</span>
+                  <span className="text-[#A39589]">▾</span>
+                </button>
+              )}
+            </div>
             <p className="text-[11px] text-[#6B5E54]">
               {cartItems.length} {cartItems.length === 1 ? 'diseño seleccionado' : 'diseños seleccionados'}
             </p>
@@ -135,12 +157,12 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                         Festejado: {item.product.celebrant}
                       </p>
                       <span className="font-bold text-sm text-[#1A1A1A] block mt-1">
-                        ${currentTierPrice.toLocaleString('es-AR')},00
+                        {formatPrice(currentTierPrice, currency)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Format Selector Pills (JPG $10k, PDF $25k, Video $34k, Web $60k) */}
+                  {/* Format Selector Pills in Active Currency */}
                   <div className="border-t border-[#E5D7C5]/60 pt-2.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6B5E54] block mb-1.5">
                       Elegir Formato de Entrega:
@@ -156,7 +178,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                         }`}
                       >
                         <span className="block font-semibold">JPG Digital</span>
-                        <span className="text-[10px] text-[#C5A059]">$10.000 ARS</span>
+                        <span className="text-[10px] text-[#C5A059]">{formatPrice(10000, currency)}</span>
                       </button>
 
                       <button
@@ -169,7 +191,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                         }`}
                       >
                         <span className="block font-semibold">PDF Interactivo</span>
-                        <span className="text-[10px] text-[#C5A059]">$25.000 ARS</span>
+                        <span className="text-[10px] text-[#C5A059]">{formatPrice(25000, currency)}</span>
                       </button>
 
                       <button
@@ -182,7 +204,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                         }`}
                       >
                         <span className="block font-semibold">Video Animado</span>
-                        <span className="text-[10px] text-[#C5A059]">$34.000 ARS</span>
+                        <span className="text-[10px] text-[#C5A059]">{formatPrice(34000, currency)}</span>
                       </button>
 
                       <button
@@ -195,7 +217,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                         }`}
                       >
                         <span className="block font-semibold">Web Clásica</span>
-                        <span className="text-[10px] text-[#C5A059]">$50.000 ARS</span>
+                        <span className="text-[10px] text-[#C5A059]">{formatPrice(50000, currency)}</span>
                       </button>
 
                       <button
@@ -212,7 +234,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                             <span className="font-semibold block">Web Premium ★ (Más Elegida)</span>
                             <span className="text-[10px] text-[#6B5E54]">Todas las 16 funciones interactivas</span>
                           </div>
-                          <span className="text-xs font-bold text-[#C5A059]">$70.000 ARS</span>
+                          <span className="text-xs font-bold text-[#C5A059]">{formatPrice(70000, currency)}</span>
                         </div>
                       </button>
                     </div>
@@ -254,18 +276,18 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
             <div className="space-y-1.5 text-xs text-[#6B5E54] border-t border-[#E5D7C5]/50 pt-2">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span className="font-semibold text-[#1A1A1A]">${subtotal.toLocaleString('es-AR')},00</span>
+                <span className="font-semibold text-[#1A1A1A]">{formatPrice(subtotalArs, currency)}</span>
               </div>
-              {discount > 0 && (
+              {discountArs > 0 && (
                 <div className="flex justify-between text-emerald-700 font-semibold">
                   <span>Descuento Especial (10%):</span>
-                  <span>-${discount.toLocaleString('es-AR')},00</span>
+                  <span>-{formatPrice(discountArs, currency)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm font-bold text-[#1A1A1A] pt-1">
                 <span>Total a Pagar:</span>
                 <span className="font-prestige text-base text-[#1A1A1A]">
-                  ${total.toLocaleString('es-AR')},00 ARS
+                  {formatPrice(totalArs, currency)}
                 </span>
               </div>
             </div>
@@ -282,7 +304,7 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
               </button>
 
               <a
-                href={`https://wa.me/5491123456789?text=${whatsappOrderMessage}`}
+                href={`https://wa.me/5491178974625?text=${whatsappOrderMessage}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-2.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
@@ -290,6 +312,17 @@ export const QuickCartDrawer: React.FC<QuickCartDrawerProps> = ({
                 <MessageCircle className="w-4 h-4" />
                 <span>Enviar Pedido directo a WhatsApp</span>
               </a>
+
+              <div className="pt-0.5 text-center">
+                <a
+                  href="https://onetouch.astropay.com/payment?external_reference_id=vzAiAKLGHKHPj1bgRAXJEWIERL6oiUDN"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-[#6B5E54] hover:text-[#1A1A1A] underline decoration-[#C5A059] inline-flex items-center gap-1"
+                >
+                  <span>¿Pagás desde el exterior o con otros bancos? AstroPay OneTouch ↗</span>
+                </a>
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-[#A39589]">

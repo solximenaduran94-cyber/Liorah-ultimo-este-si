@@ -2,6 +2,7 @@ import React from 'react';
 import { ExternalLink, Play, Sparkles, Check, Heart, Smartphone } from 'lucide-react';
 import { LiorahPackageTier } from '../types';
 import { WebPageScreenMockup } from './WebPageScreenMockup';
+import { SupportedCurrency, formatPrice } from '../utils/currency';
 
 export interface StoreProductItem {
   id: string;
@@ -21,6 +22,7 @@ export interface StoreProductItem {
 interface StoreProductCardProps {
   product: StoreProductItem;
   customImage?: string;
+  currency?: SupportedCurrency;
   onBuy: (product: StoreProductItem, tier: LiorahPackageTier) => void;
   onOpenDemo: (product: StoreProductItem) => void;
 }
@@ -28,6 +30,7 @@ interface StoreProductCardProps {
 export const StoreProductCard: React.FC<StoreProductCardProps> = ({
   product,
   customImage,
+  currency = 'ARS',
   onBuy,
   onOpenDemo,
 }) => {
@@ -110,17 +113,17 @@ export const StoreProductCard: React.FC<StoreProductCardProps> = ({
           Invitación Página Web | {product.name}
         </h3>
 
-        {/* Price display in InvitArte format: $45.000,00 or $60.000,00 */}
+        {/* Price display in selected currency (ARS, USD, MXN, EUR, CLP) */}
         <div className="py-1">
           <p className="font-ui text-sm sm:text-base font-semibold text-[#1A1A1A]">
-            ${product.price.toLocaleString('es-AR')},00
+            {formatPrice(product.price, currency)}
           </p>
           <div className="flex items-center justify-center gap-2 text-[10px] text-[#A39589] font-ui mt-0.5">
-            <span>JPG $10k</span>
+            <span>JPG {formatPrice(10000, currency, false)}</span>
             <span>·</span>
-            <span>PDF $25k</span>
+            <span>PDF {formatPrice(25000, currency, false)}</span>
             <span>·</span>
-            <span>Video $34k</span>
+            <span>Video {formatPrice(34000, currency, false)}</span>
           </div>
           {product.price >= 60000 && (
             <p className="text-[10px] text-[#C5A059] font-medium mt-1">

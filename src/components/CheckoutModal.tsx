@@ -16,13 +16,17 @@ import {
   Smartphone,
   Image,
   Zap,
+  ExternalLink,
 } from 'lucide-react';
 import { InvitationDesign, DesignPreferences, LiorahPackageTier, LIORAH_PACKAGES, formatPriceEquivalents } from '../types';
+import { SupportedCurrency, CURRENCIES, formatPrice, ASTROPAY_PAYMENT_LINK } from '../utils/currency';
 
 interface CheckoutModalProps {
   design: InvitationDesign;
   preferences: DesignPreferences;
   initialTier?: LiorahPackageTier;
+  currency?: SupportedCurrency;
+  onOpenCurrencyModal?: () => void;
   onClose: () => void;
   onOrderCompleted?: (orderId: string) => void;
 }
@@ -31,6 +35,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   design,
   preferences,
   initialTier = 'interactive',
+  currency = 'ARS',
+  onOpenCurrencyModal,
   onClose,
   onOrderCompleted,
 }) => {
@@ -39,7 +45,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [individualPasses, setIndividualPasses] = useState(false);
 
   // Payment tab
-  const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'transfer' | 'card'>('transfer');
+  const [paymentMethod, setPaymentMethod] = useState<'transfer' | 'mercadopago' | 'astropay' | 'card'>('transfer');
 
   // Coupon state
   const [couponCode, setCouponCode] = useState('');
@@ -56,21 +62,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [orderId, setOrderId] = useState('');
-  const [copiedAlias, setCopiedAlias] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const currencyInfo = CURRENCIES[currency] || CURRENCIES.ARS;
 
   // Price calculations based on official LIORAH STUDIO tiers
-  const basePrice = LIORAH_PACKAGES[packageTier].price;
-  const rushPrice = rushDelivery ? 6000 : 0;
-  const passesPrice = individualPasses ? 5000 : 0;
-  const subtotal = basePrice + rushPrice + passesPrice;
+  const basePriceArs = LIORAH_PACKAGES[packageTier].price;
+  const rushPriceArs = rushDelivery ? 6000 : 0;
+  const passesPriceArs = individualPasses ? 5000 : 0;
+  const subtotalArs = basePriceArs + rushPriceArs + passesPriceArs;
 
-  let discountAmount = 0;
+  let discountAmountArs = 0;
   if (appliedDiscount?.percent) {
-    discountAmount = Math.round((subtotal * appliedDiscount.percent) / 100);
+    discountAmountArs = Math.round((subtotalArs * appliedDiscount.percent) / 100);
   } else if (appliedDiscount?.fixed) {
-    discountAmount = appliedDiscount.fixed;
+    discountAmountArs = appliedDiscount.fixed;
   }
-  const total = Math.max(0, subtotal - discountAmount);
+  const totalArs = Math.max(0, subtotalArs - discountAmountArs);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,21 +124,24 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }, 1800);
   };
 
-  const transferAlias = 'LIORAH.STUDIO.MP';
-  const transferCbu = '0000003100094821568912';
-
-  const handleCopyAlias = () => {
-    navigator.clipboard?.writeText(transferAlias);
-    setCopiedAlias(true);
-    setTimeout(() => setCopiedAlias(false), 2000);
+  const handleCopyAccount = (textToCopy: string) => {
+    navigator.clipboard?.writeText(textToCopy);
+    setCopiedAccount(true);
+    setTimeout(() => setCopiedAccount(false), 2000);
   };
 
-  const equivalents = formatPriceEquivalents(total);
+  const handleCopyField = (fieldName: string, textToCopy: string) => {
+    navigator.clipboard?.writeText(textToCopy);
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const formattedTotal = formatPrice(totalArs, currency);
   const whatsappMessage = encodeURIComponent(
     `¡Hola LIORAH STUDIO! ♥ Acabo de confirmar mi pedido ${orderId} para "${design.title}". ` +
     `Propuesta elegida: ${LIORAH_PACKAGES[packageTier].title}. ` +
     `Festejados: ${preferences.hostsNames}, Fecha: ${preferences.eventDate}. ` +
-    `Total: $${total.toLocaleString('es-AR')} ARS (${equivalents.combined}). ¡Ya les envío el comprobante para empezar a crear juntos!`
+    `Total: ${formattedTotal} (${currencyInfo.country}). ¡Ya les envío el comprobante para empezar a crear juntos!`
   );
 
   return (
@@ -145,13 +157,29 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <span className="text-[#E5D7C5]">/</span>
             <span className="font-ui text-xs text-[#6B5E54]">Confirmación de Pedido</span>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-[#6B5E54] hover:bg-[#F5EFE6] hover:text-[#1A1A1A] transition-colors cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            {onOpenCurrencyModal && (
+              <button
+                type="button"
+                onClick={onOpenCurrencyModal}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFFDF9] border border-[#E5D7C5] hover:border-[#C5A059] text-xs font-semibold text-[#1A1A1A] cursor-pointer"
+                title="Cambiar moneda"
+              >
+                <span>{currencyInfo.flag}</span>
+                <span>{currency}</span>
+                <span className="text-[#A39589]">▾</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full p-1.5 text-[#6B5E54] hover:bg-[#F5EFE6] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {orderCompleted ? (
@@ -191,15 +219,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="flex justify-between border-b border-[#E5D7C5]/60 pb-2">
                 <span className="text-[#6B5E54]">Medio de Pago:</span>
                 <span className="font-semibold text-[#1A1A1A] uppercase">
-                  {paymentMethod === 'transfer' ? 'Transferencia Bancaria / Alias' : paymentMethod === 'mercadopago' ? 'Mercado Pago' : 'Tarjeta'}
+                  {paymentMethod === 'transfer'
+                    ? currencyInfo.paymentDetails.method
+                    : paymentMethod === 'mercadopago'
+                    ? 'Mercado Pago'
+                    : paymentMethod === 'astropay'
+                    ? 'AstroPay OneTouch'
+                    : 'Tarjeta Déb/Créd'}
                 </span>
               </div>
               <div className="flex justify-between items-baseline pt-1 text-sm font-bold text-[#1A1A1A]">
                 <span>Total Final:</span>
                 <div className="text-right">
-                  <span className="text-[#C5A059] font-ui block">${total.toLocaleString('es-AR')} ARS</span>
+                  <span className="text-[#C5A059] font-ui block">{formattedTotal}</span>
                   <span className="text-[10px] text-[#6B5E54] font-medium block">
-                    {equivalents.combined}
+                    {currencyInfo.country}
                   </span>
                 </div>
               </div>
@@ -221,7 +255,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {/* Direct WhatsApp Contact CTA */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href={`https://wa.me/5215512345678?text=${whatsappMessage}`}
+                href={`https://wa.me/5491178974625?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1A1A1A] px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#FAF6F0] shadow-md hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-all"
@@ -283,10 +317,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           </div>
                           <div className="shrink-0 ml-3 text-right">
                             <span className="font-ui text-sm font-bold text-[#1A1A1A] block">
-                              ${pkg.price.toLocaleString('es-AR')}
+                              {formatPrice(pkg.price, currency)}
                             </span>
                             <span className="font-ui text-[10px] text-[#C5A059] block font-medium">
-                              ≈ ${pkg.priceUSD} USD · ${pkg.priceMXN} MXN
+                              {currency === 'ARS'
+                                ? `≈ $${pkg.priceUSD} USD · $${pkg.priceMXN} MXN`
+                                : `Base: $${pkg.price.toLocaleString('es-AR')} ARS`}
                             </span>
                           </div>
                         </button>
@@ -318,7 +354,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           </span>
                         </div>
                       </div>
-                      <span className="font-ui text-xs font-semibold text-[#1A1A1A]">+$6.000 ARS</span>
+                      <span className="font-ui text-xs font-semibold text-[#1A1A1A]">+{formatPrice(6000, currency)}</span>
                     </label>
 
                     {packageTier === 'interactive' && (
@@ -339,7 +375,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                             </span>
                           </div>
                         </div>
-                        <span className="font-ui text-xs font-semibold text-[#1A1A1A]">+$5.000 ARS</span>
+                        <span className="font-ui text-xs font-semibold text-[#1A1A1A]">+{formatPrice(5000, currency)}</span>
                       </label>
                     )}
                   </div>
@@ -348,9 +384,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 {/* Payment Selector */}
                 <div>
                   <label className="font-ui text-xs font-semibold uppercase tracking-[0.15em] text-[#1A1A1A] block mb-2">
-                    Forma de Pago
+                    Forma de Pago ({currencyInfo.name})
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className={`grid gap-2 ${currency === 'ARS' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'}`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('transfer')}
@@ -361,20 +397,47 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       }`}
                     >
                       <Building2 className="h-4 w-4 mb-1 text-[#C5A059]" />
-                      <span className="font-ui text-[11px]">Transferencia / Alias</span>
+                      <span className="font-ui text-[11px] leading-tight">
+                        {currency === 'ARS'
+                          ? 'Transferencia / Alias'
+                          : currency === 'USD'
+                          ? 'Cuenta USA (SSB)'
+                          : currency === 'EUR'
+                          ? 'Cuenta SEPA (LHV)'
+                          : currency === 'GBP'
+                          ? 'Cuenta UK (LHV)'
+                          : 'Transferencia'}
+                      </span>
                     </button>
+
+                    {currency === 'ARS' && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('mercadopago')}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                          paymentMethod === 'mercadopago'
+                            ? 'border-[#C5A059] bg-[#FFFDF9] font-bold text-[#1A1A1A] ring-1 ring-[#C5A059]'
+                            : 'border-[#E5D7C5] bg-[#FFFDF9]/60 text-[#6B5E54] hover:bg-[#FFFDF9]'
+                        }`}
+                      >
+                        <Sparkles className="h-4 w-4 mb-1 text-[#009EE3]" />
+                        <span className="font-ui text-[11px] leading-tight">Mercado Pago</span>
+                      </button>
+                    )}
 
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod('mercadopago')}
+                      onClick={() => setPaymentMethod('astropay')}
                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
-                        paymentMethod === 'mercadopago'
+                        paymentMethod === 'astropay'
                           ? 'border-[#C5A059] bg-[#FFFDF9] font-bold text-[#1A1A1A] ring-1 ring-[#C5A059]'
                           : 'border-[#E5D7C5] bg-[#FFFDF9]/60 text-[#6B5E54] hover:bg-[#FFFDF9]'
                       }`}
                     >
-                      <Sparkles className="h-4 w-4 mb-1 text-[#009EE3]" />
-                      <span className="font-ui text-[11px]">Mercado Pago</span>
+                      <Zap className="h-4 w-4 mb-1 text-[#C5A059]" />
+                      <span className="font-ui text-[11px] leading-tight">
+                        {currency === 'ARS' ? 'AstroPay' : 'AstroPay (Otros)'}
+                      </span>
                     </button>
 
                     <button
@@ -387,36 +450,111 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       }`}
                     >
                       <CreditCard className="h-4 w-4 mb-1 text-[#6B5E54]" />
-                      <span className="font-ui text-[11px]">Tarjeta Déb/Créd</span>
+                      <span className="font-ui text-[11px] leading-tight">
+                        {currency === 'ARS' ? 'Tarjetas' : 'Tarjeta Déb/Créd'}
+                      </span>
                     </button>
                   </div>
                 </div>
 
-                {/* TRANSFER / ALIAS VIEW */}
+                {/* TRANSFER / DIRECT PAYMENT VIEW */}
                 {paymentMethod === 'transfer' && (
                   <div className="rounded-2xl bg-[#FFFDF9] p-4 border border-[#E5D7C5] space-y-3 font-ui">
+                    <div className="flex items-center justify-between pb-1 border-b border-[#E5D7C5]/50">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-[#C5A059]" />
+                        <span className="font-prestige text-xs font-bold text-[#1A1A1A]">
+                          {currencyInfo.paymentDetails.method}
+                        </span>
+                      </div>
+                      <span className="text-[10px] uppercase font-semibold text-[#C5A059] bg-[#FAF6F0] px-2 py-0.5 rounded-full border border-[#E5D7C5]">
+                        {currencyInfo.name}
+                      </span>
+                    </div>
+
                     <p className="text-xs text-[#6B5E54] leading-relaxed">
-                      Transferí desde la app de tu banco o Mercado Pago a nuestro alias oficial:
+                      {currencyInfo.paymentDetails.instructions}
                     </p>
-                    <div className="rounded-xl bg-[#FAF6F0] p-3 border border-[#E5D7C5] space-y-2 text-xs">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#6B5E54]">Titular:</span>
-                        <span className="font-semibold text-[#1A1A1A]">LIORAH STUDIO</span>
+
+                    {/* Detailed Bank Fields with 1-click Copy */}
+                    <div className="rounded-xl bg-[#FAF6F0] p-3.5 border border-[#E5D7C5] space-y-2 text-xs">
+                      <div className="flex justify-between items-center pb-1.5 border-b border-[#E5D7C5]/60">
+                        <span className="text-[#6B5E54]">Titular de la cuenta:</span>
+                        <span className="font-bold text-[#1A1A1A]">{currencyInfo.paymentDetails.accountHolder}</span>
                       </div>
-                      <div className="flex justify-between items-center pt-1 border-t border-[#E5D7C5]/50">
-                        <div>
-                          <span className="text-[#6B5E54] block text-[10px]">Alias Mercado Pago:</span>
-                          <span className="font-mono font-bold text-[#1A1A1A] text-sm">{transferAlias}</span>
+
+                      {currencyInfo.paymentDetails.fields && currencyInfo.paymentDetails.fields.length > 0 ? (
+                        currencyInfo.paymentDetails.fields.map((f, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between pt-1.5 border-t border-[#E5D7C5]/40 first:border-t-0 first:pt-0"
+                          >
+                            <div className="min-w-0 pr-2">
+                              <span className="text-[10px] text-[#8C7E72] block uppercase tracking-wider">
+                                {f.label}
+                              </span>
+                              <span className="font-mono text-xs font-bold text-[#1A1A1A] break-all">
+                                {f.value}
+                              </span>
+                            </div>
+                            {f.copyable && (
+                              <button
+                                type="button"
+                                onClick={() => handleCopyField(f.label, f.value)}
+                                className="shrink-0 flex items-center gap-1 rounded-lg bg-[#1A1A1A] px-2.5 py-1 text-[10px] font-semibold text-[#FAF6F0] hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+                              >
+                                {copiedField === f.label ? (
+                                  <>
+                                    <Check className="h-3 w-3 text-[#D4AF37]" />
+                                    <span>¡Copiado!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-3 w-3" />
+                                    <span>Copiar</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex justify-between items-center pt-1 border-t border-[#E5D7C5]/50">
+                          <div>
+                            <span className="text-[#6B5E54] block text-[10px]">{currencyInfo.paymentDetails.accountLabel}:</span>
+                            <span className="font-mono font-bold text-[#1A1A1A] text-sm">{currencyInfo.paymentDetails.accountValue}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyAccount(currencyInfo.paymentDetails.accountValue)}
+                            className="flex items-center gap-1 rounded-xl bg-[#1A1A1A] px-3 py-1 text-[11px] font-semibold text-[#FAF6F0] hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-colors cursor-pointer"
+                          >
+                            {copiedAccount ? <Check className="h-3 w-3 text-[#D4AF37]" /> : <Copy className="h-3 w-3" />}
+                            <span>{copiedAccount ? '¡Copiado!' : 'Copiar'}</span>
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={handleCopyAlias}
-                          className="flex items-center gap-1 rounded-xl bg-[#1A1A1A] px-3 py-1 text-[11px] font-semibold text-[#FAF6F0] hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-colors"
-                        >
-                          {copiedAlias ? <Check className="h-3 w-3 text-[#D4AF37]" /> : <Copy className="h-3 w-3" />}
-                          <span>{copiedAlias ? '¡Copiado!' : 'Copiar Alias'}</span>
-                        </button>
+                      )}
+                    </div>
+
+                    {/* AstroPay OneTouch Direct Callout */}
+                    <div className="rounded-xl bg-[#FFFDF9] p-3 border border-[#E5D7C5] flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                      <div className="text-left">
+                        <span className="text-[11px] font-bold text-[#1A1A1A] block">
+                          ¿Querés pagar con otro banco por AstroPay?
+                        </span>
+                        <span className="text-[10px] text-[#6B5E54]">
+                          Enlace directo para abonar en 1 clic desde cualquier entidad bancaria.
+                        </span>
                       </div>
+                      <a
+                        href={ASTROPAY_PAYMENT_LINK}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1A1A1A] text-[#FAF6F0] text-[11px] font-semibold hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-colors"
+                      >
+                        <span>Pagar con AstroPay</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
                     </div>
 
                     <button
@@ -425,8 +563,51 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       disabled={isProcessing}
                       className="w-full rounded-2xl bg-[#1A1A1A] py-3.5 text-xs font-semibold uppercase tracking-wider text-[#FAF6F0] shadow-md hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      {isProcessing ? 'Verificando...' : 'Confirmar Pedido y Enviar Comprobante'}
+                      {isProcessing ? 'Verificando...' : `Confirmar Pedido (${formattedTotal})`}
                     </button>
+                  </div>
+                )}
+
+                {/* ASTROPAY VIEW */}
+                {paymentMethod === 'astropay' && (
+                  <div className="rounded-2xl bg-[#FFFDF9] p-5 border border-[#E5D7C5] text-center space-y-4 font-ui">
+                    <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 mx-auto flex items-center justify-center text-[#C5A059]">
+                      <Zap className="w-6 h-6 stroke-[2]" />
+                    </div>
+                    <div>
+                      <h4 className="font-prestige text-sm sm:text-base font-bold text-[#1A1A1A]">
+                        AstroPay OneTouch · Otros Bancos & Internacional
+                      </h4>
+                      <p className="text-xs text-[#6B5E54] max-w-sm mx-auto mt-1 leading-relaxed">
+                        Aboná de forma segura desde cualquier banco del mundo, tarjetas locales o billeteras virtuales.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[#FAF6F0] rounded-xl border border-[#E5D7C5] text-xs text-[#6B5E54] flex items-center justify-between max-w-sm mx-auto">
+                      <span>Total del pedido:</span>
+                      <span className="font-bold text-[#1A1A1A] text-sm">{formattedTotal}</span>
+                    </div>
+
+                    <div className="space-y-2.5 max-w-sm mx-auto">
+                      <a
+                        href={ASTROPAY_PAYMENT_LINK}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full rounded-2xl bg-[#1A1A1A] py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[#FAF6F0] shadow-md hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>Abrir Pasarela AstroPay OneTouch</span>
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={handleSubmitPayment}
+                        disabled={isProcessing}
+                        className="w-full rounded-xl border border-[#E5D7C5] bg-[#FAF6F0] py-2.5 text-xs font-medium text-[#6B5E54] hover:bg-[#F5EFE6] transition-colors cursor-pointer"
+                      >
+                        {isProcessing ? 'Verificando...' : 'Ya realicé el pago en AstroPay (Continuar)'}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -442,7 +623,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       disabled={isProcessing}
                       className="w-full rounded-2xl bg-[#009EE3] py-3.5 text-xs font-bold text-white shadow-md hover:bg-[#0089C7] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      {isProcessing ? 'Conectando...' : `Pagar $${total.toLocaleString('es-AR')} con Mercado Pago`}
+                      {isProcessing ? 'Conectando...' : `Pagar ${formattedTotal} con Mercado Pago`}
                     </button>
                   </div>
                 )}
@@ -499,7 +680,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       disabled={isProcessing}
                       className="w-full rounded-2xl bg-[#1A1A1A] py-3.5 text-xs font-semibold uppercase tracking-wider text-[#FAF6F0] shadow-md hover:bg-[#C5A059] hover:text-[#1A1A1A] transition-all flex items-center justify-center gap-2 cursor-pointer mt-3"
                     >
-                      {isProcessing ? 'Procesando...' : `Abonar $${total.toLocaleString('es-AR')} ARS`}
+                      {isProcessing ? 'Procesando...' : `Abonar ${formattedTotal}`}
                     </button>
                   </form>
                 )}
@@ -533,27 +714,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <div className="space-y-1.5 text-xs border-b border-[#E5D7C5]/60 pb-3 mb-3 text-[#6B5E54]">
                   <div className="flex justify-between">
                     <span>{LIORAH_PACKAGES[packageTier].title}:</span>
-                    <span className="font-semibold text-[#1A1A1A]">${basePrice.toLocaleString('es-AR')}</span>
+                    <span className="font-semibold text-[#1A1A1A]">{formatPrice(basePriceArs, currency)}</span>
                   </div>
 
                   {rushDelivery && (
                     <div className="flex justify-between">
                       <span>Entrega Express 24h:</span>
-                      <span className="font-semibold text-[#1A1A1A]">+$6.000</span>
+                      <span className="font-semibold text-[#1A1A1A]">+{formatPrice(6000, currency)}</span>
                     </div>
                   )}
 
                   {individualPasses && (
                     <div className="flex justify-between">
                       <span>Pases individuales con nombres:</span>
-                      <span className="font-semibold text-[#1A1A1A]">+$5.000</span>
+                      <span className="font-semibold text-[#1A1A1A]">+{formatPrice(5000, currency)}</span>
                     </div>
                   )}
 
-                  {discountAmount > 0 && (
+                  {discountAmountArs > 0 && (
                     <div className="flex justify-between text-[#C5A059] font-semibold">
                       <span>Descuento ({appliedDiscount?.code}):</span>
-                      <span>-${discountAmount.toLocaleString('es-AR')}</span>
+                      <span>-{formatPrice(discountAmountArs, currency)}</span>
                     </div>
                   )}
                 </div>
@@ -563,10 +744,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <span className="text-xs font-bold uppercase tracking-wider text-[#1A1A1A]">Total Final:</span>
                   <div className="text-right">
                     <span className="text-xl font-bold text-[#1A1A1A] tabular-nums block">
-                      ${total.toLocaleString('es-AR')} ARS
+                      {formattedTotal}
                     </span>
                     <span className="font-ui text-[11px] font-semibold text-[#C5A059] block">
-                      {equivalents.combined}
+                      {currencyInfo.country}
                     </span>
                     <span className="text-[10px] text-[#A39589]">Diseño personalizado incluido</span>
                   </div>

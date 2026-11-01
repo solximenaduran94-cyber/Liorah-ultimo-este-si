@@ -1,14 +1,20 @@
 import React from 'react';
-import { Check, Sparkles, Plus, ArrowRight } from 'lucide-react';
+import { Check, Sparkles, Plus, ArrowRight, Globe } from 'lucide-react';
 import { LiorahPackageTier } from '../types';
+import { SupportedCurrency, CURRENCIES, formatPrice } from '../utils/currency';
 
 interface ComparisonPricingTableProps {
   onSelectTier: (tier: LiorahPackageTier) => void;
+  currency?: SupportedCurrency;
+  onOpenCurrencyModal?: () => void;
 }
 
 export const ComparisonPricingTable: React.FC<ComparisonPricingTableProps> = ({
   onSelectTier,
+  currency = 'ARS',
+  onOpenCurrencyModal,
 }) => {
+  const currencyInfo = CURRENCIES[currency] || CURRENCIES.ARS;
   const comparisonRows = [
     { feature: 'Video de portada para ingresar a la web (Intro animada)', clasica: false, premium: true },
     { feature: 'Música de fondo', clasica: true, premium: true },
@@ -117,20 +123,31 @@ export const ComparisonPricingTable: React.FC<ComparisonPricingTableProps> = ({
           </div>
 
           {/* Table Footer Prices */}
+          {/* Table Footer Prices */}
           <div className="grid grid-cols-12 pt-6 pb-2 border-t border-[#E5D7C5] items-center text-center">
             <div className="col-span-6 sm:col-span-6 text-left">
               <span className="font-prestige text-xs uppercase tracking-widest text-[#1A1A1A] font-bold block">
                 Valor del Servicio
               </span>
               <span className="font-ui text-[11px] text-[#6B5E54]">
-                Tarifa única para invitados ilimitados
+                Tarifa única para invitados ilimitados ({currencyInfo.code})
               </span>
+              {onOpenCurrencyModal && (
+                <button
+                  type="button"
+                  onClick={onOpenCurrencyModal}
+                  className="mt-1 text-[10px] text-[#C5A059] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{currencyInfo.flag} Moneda: {currency}</span>
+                  <span className="text-[9px]">· Cambiar</span>
+                </button>
+              )}
             </div>
 
             {/* Clásica Price & Button */}
             <div className="col-span-3 sm:col-span-3 text-center px-1">
               <p className="font-prestige text-base sm:text-xl font-bold text-[#1A1A1A]">
-                $50.000
+                {formatPrice(50000, currency)}
               </p>
               <button
                 type="button"
@@ -144,7 +161,7 @@ export const ComparisonPricingTable: React.FC<ComparisonPricingTableProps> = ({
             {/* Premium Price & Button */}
             <div className="col-span-3 sm:col-span-3 text-center px-1">
               <p className="font-prestige text-base sm:text-xl font-bold text-[#1A1A1A]">
-                $70.000
+                {formatPrice(70000, currency)}
               </p>
               <button
                 type="button"
@@ -169,7 +186,7 @@ export const ComparisonPricingTable: React.FC<ComparisonPricingTableProps> = ({
           </div>
         </div>
 
-        {/* Format Selector Note: JPG $10.000, PDF $25.000, Video $34.000 */}
+        {/* Format Selector Note with dynamic currency */}
         <div className="mt-6 p-4 rounded-2xl bg-[#FFFDF9] border border-[#E5D7C5] flex flex-wrap items-center justify-between gap-3 font-ui text-xs">
           <div>
             <span className="font-semibold text-[#1A1A1A] block">
@@ -185,21 +202,21 @@ export const ComparisonPricingTable: React.FC<ComparisonPricingTableProps> = ({
               onClick={() => onSelectTier('express')}
               className="px-2.5 py-1 rounded-lg bg-[#FAF6F0] border border-[#E5D7C5] hover:border-[#C5A059] font-medium text-[#1A1A1A] cursor-pointer"
             >
-              JPG: <strong>$10.000</strong>
+              JPG: <strong>{formatPrice(10000, currency)}</strong>
             </button>
             <button
               type="button"
               onClick={() => onSelectTier('basic')}
               className="px-2.5 py-1 rounded-lg bg-[#FAF6F0] border border-[#E5D7C5] hover:border-[#C5A059] font-medium text-[#1A1A1A] cursor-pointer"
             >
-              PDF: <strong>$25.000</strong>
+              PDF: <strong>{formatPrice(25000, currency)}</strong>
             </button>
             <button
               type="button"
               onClick={() => onSelectTier('animated_video')}
               className="px-2.5 py-1 rounded-lg bg-[#FAF6F0] border border-[#E5D7C5] hover:border-[#C5A059] font-medium text-[#1A1A1A] cursor-pointer"
             >
-              Video: <strong>$34.000</strong>
+              Video: <strong>{formatPrice(34000, currency)}</strong>
             </button>
           </div>
         </div>

@@ -16,9 +16,11 @@ import { PromoInfoModal } from './components/PromoInfoModal';
 import { CustomerPortalModal } from './components/CustomerPortalModal';
 import { RealSampleViewerModal } from './components/RealSampleViewerModal';
 import { CheckoutModal } from './components/CheckoutModal';
+import { CurrencySelectorModal } from './components/CurrencySelectorModal';
 import { REAL_SAMPLES, RealSampleItem } from './data/realSamples';
 import { INVITATION_CATALOG } from './data/invitations';
 import { InvitationDesign, DesignPreferences, LiorahPackageTier, LIORAH_PACKAGES } from './types';
+import { SupportedCurrency, getSavedCurrency, saveSelectedCurrency } from './utils/currency';
 import { MessageCircle, X } from 'lucide-react';
 
 export default function App() {
@@ -27,6 +29,8 @@ export default function App() {
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [customerPortalOpen, setCustomerPortalOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [currencyModalOpen, setCurrencyModalOpen] = useState(false);
+  const [currentCurrency, setCurrentCurrency] = useState<SupportedCurrency>(() => getSavedCurrency());
 
   // Cart items
   const [cartItems, setCartItems] = useState<CartItem[]>([
@@ -157,14 +161,20 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FFFDF9] text-[#1A1A1A] antialiased">
       {/* 1. TOP PROMOTIONAL RIBBON (Matching Page 1 of InvitArte PDF) */}
-      <PromoTopBar onOpenPromoInfo={() => setPromoModalOpen(true)} />
+      <PromoTopBar
+        onOpenPromoInfo={() => setPromoModalOpen(true)}
+        currentCurrency={currentCurrency}
+        onOpenCurrencyModal={() => setCurrencyModalOpen(true)}
+      />
 
-      {/* 2. STORE HEADER with Menu, Search, Cursive Logo, Account and Cart (Page 1) */}
+      {/* 2. STORE HEADER with Menu, Search, Cursive Logo, Account, Currency & Cart (Page 1) */}
       <StoreHeader
         cartCount={cartItems.length}
         onOpenCart={() => setCartOpen(true)}
         onOpenSearch={() => setSearchModalOpen(true)}
         onOpenCustomerPortal={() => setCustomerPortalOpen(true)}
+        currentCurrency={currentCurrency}
+        onOpenCurrencyModal={() => setCurrencyModalOpen(true)}
       />
 
       {/* 3. CATEGORY ICONS BAR (Boda, 15 años, Cumpleaños, Todas) (Page 1) */}
@@ -178,6 +188,7 @@ export default function App() {
         {/* 4. "LOS MÁS ELEGIDOS" Product Grid with Dual-Phone Mockups (Page 1 & 2) */}
         <StoreCatalogSection
           selectedCategory={selectedCategory}
+          currency={currentCurrency}
           onBuyProduct={handleBuyProduct}
           onOpenLiveDemo={handleOpenLiveDemo}
         />
@@ -186,7 +197,11 @@ export default function App() {
         <InvitArteFeaturesCard />
 
         {/* 6. "Elegí la opción que más se adapta a tu evento" COMPARISON TABLE (Page 3) */}
-        <ComparisonPricingTable onSelectTier={handleSelectTierFromTable} />
+        <ComparisonPricingTable
+          onSelectTier={handleSelectTierFromTable}
+          currency={currentCurrency}
+          onOpenCurrencyModal={() => setCurrencyModalOpen(true)}
+        />
 
         {/* 7. "¿CÓMO FUNCIONA?" 3 Circular Steps (Page 3) */}
         <HowItWorksThreeSteps />
@@ -204,7 +219,7 @@ export default function App() {
       {/* FLOATING WHATSAPP BUTTON */}
       <aside aria-label="Contacto directo por WhatsApp" className="fixed bottom-6 right-6 z-30">
         <a
-          href="https://wa.me/5491123456789?text=Hola%20LIORAH%20STUDIO!%20Quisiera%20consultar%20por%20una%20invitación%20personalizada"
+          href="https://wa.me/5491178974625?text=Hola%20LIORAH%20STUDIO!%20Quisiera%20consultar%20por%20una%20invitación%20personalizada"
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-bold text-white shadow-xl hover:bg-emerald-700 transition-all hover:scale-105"
@@ -219,6 +234,8 @@ export default function App() {
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
         cartItems={cartItems}
+        currency={currentCurrency}
+        onOpenCurrencyModal={() => setCurrencyModalOpen(true)}
         onUpdateTier={(productId, tier) => {
           setCartItems((prev) =>
             prev.map((i) => (i.product.id === productId ? { ...i, tier } : i))
@@ -269,9 +286,22 @@ export default function App() {
           design={checkoutModalData.design}
           preferences={checkoutModalData.preferences}
           initialTier={checkoutModalData.tier}
+          currency={currentCurrency}
+          onOpenCurrencyModal={() => setCurrencyModalOpen(true)}
           onClose={() => setCheckoutModalData(null)}
         />
       )}
+
+      {/* CURRENCY SELECTOR MODAL */}
+      <CurrencySelectorModal
+        isOpen={currencyModalOpen}
+        onClose={() => setCurrencyModalOpen(false)}
+        currentCurrency={currentCurrency}
+        onSelectCurrency={(curr) => {
+          setCurrentCurrency(curr);
+          saveSelectedCurrency(curr);
+        }}
+      />
     </div>
   );
 }

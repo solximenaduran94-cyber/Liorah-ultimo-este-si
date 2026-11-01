@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { StoreProductCard, StoreProductItem } from './StoreProductCard';
 import { StoreCategory } from './StoreCategoriesNav';
 import { LiorahPackageTier } from '../types';
+import { SupportedCurrency } from '../utils/currency';
 
 interface StoreCatalogSectionProps {
   selectedCategory: StoreCategory;
+  currency?: SupportedCurrency;
   onBuyProduct: (product: StoreProductItem, tier: LiorahPackageTier) => void;
   onOpenLiveDemo: (product: StoreProductItem) => void;
 }
@@ -108,6 +110,7 @@ export const STORE_PRODUCTS: StoreProductItem[] = [
 
 export const StoreCatalogSection: React.FC<StoreCatalogSectionProps> = ({
   selectedCategory,
+  currency = 'ARS',
   onBuyProduct,
   onOpenLiveDemo,
 }) => {
@@ -148,6 +151,7 @@ export const StoreCatalogSection: React.FC<StoreCatalogSectionProps> = ({
             <StoreProductCard
               key={prod.id}
               product={prod}
+              currency={currency}
               customImage={customThumbnails[prod.id]}
               onBuy={onBuyProduct}
               onOpenDemo={onOpenLiveDemo}

@@ -58,20 +58,72 @@ export const ReviewsSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Instagram Callout matching Page 6 */}
-        <div className="mt-14 text-center">
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 p-3 rounded-full hover:bg-[#FAF6F0] text-[#1A1A1A] transition-colors"
-            aria-label="Instagram de Liorah Studio"
-          >
-            <Instagram className="w-6 h-6 stroke-[1.5]" />
-            <span className="font-ui text-xs font-semibold tracking-wider text-[#6B5E54]">
-              @liorah.site
-            </span>
-          </a>
+        {/* Social Media Channels Strip */}
+        <div className="mt-14 pt-8 border-t border-[#E5D7C5]/60 text-center">
+          <p className="font-ui text-xs uppercase tracking-[0.2em] text-[#A39589] font-semibold mb-4">
+            Encontranos en redes y mirá nuestros reels en acción
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 font-ui text-xs">
+            {/* TikTok */}
+            <a
+              href="https://www.tiktok.com/@liorah.ok"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF6F0] hover:bg-[#F5EFE6] border border-[#E5D7C5] text-[#1A1A1A] font-medium transition-all hover:border-[#C5A059] shadow-xs"
+            >
+              <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.29 0 .58.04.86.12V9.42a6.34 6.34 0 0 0-.86-.06 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.76a8.28 8.28 0 0 0 4.77 1.48v-3.5a4.85 4.85 0 0 1-1-.05z"/>
+              </svg>
+              <span>TikTok: <strong>@liorah.ok</strong></span>
+            </a>
+
+            {/* Instagram */}
+            <a
+              href="https://www.instagram.com/liorah.ok"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF6F0] hover:bg-[#F5EFE6] border border-[#E5D7C5] text-[#1A1A1A] font-medium transition-all hover:border-[#C5A059] shadow-xs"
+            >
+              <Instagram className="w-4 h-4 text-[#C5A059] shrink-0" />
+              <span>Instagram: <strong>@liorah.ok</strong></span>
+            </a>
+
+            {/* Instagram Anterior */}
+            <a
+              href="https://www.instagram.com/liorah.ok2"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#FFFDF9] hover:bg-[#FAF6F0] border border-[#E5D7C5] text-[#6B5E54] font-medium transition-all hover:border-[#C5A059] text-[11px]"
+            >
+              <Instagram className="w-3.5 h-3.5 text-[#A39589] shrink-0" />
+              <span>Instagram anterior: <strong>@liorah.ok2</strong></span>
+            </a>
+
+            {/* Facebook */}
+            <a
+              href="https://www.facebook.com/share/1D4RH2VURD/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF6F0] hover:bg-[#F5EFE6] border border-[#E5D7C5] text-[#1A1A1A] font-medium transition-all hover:border-[#C5A059] shadow-xs"
+            >
+              <svg className="w-4 h-4 fill-current text-blue-600 shrink-0" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+              <span>Facebook</span>
+            </a>
+
+            {/* WhatsApp */}
+            <a
+              href="https://wa.me/5491178974625?text=Hola%20LIORAH%20STUDIO!%20Quisiera%20consultar%20por%20una%20invitación%20personalizada"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 font-semibold transition-all shadow-xs"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>WhatsApp: <strong>+54 9 11 7897-4625</strong></span>
+            </a>
+          </div>
         </div>
       </div>
     </section>
