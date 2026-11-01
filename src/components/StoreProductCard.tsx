@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Play, Sparkles, Check, Heart, Smartphone, Camera, RotateCcw } from 'lucide-react';
+import { ExternalLink, Play, Sparkles, Check, Heart, Smartphone } from 'lucide-react';
 import { LiorahPackageTier } from '../types';
 import { WebPageScreenMockup } from './WebPageScreenMockup';
 
@@ -23,8 +23,6 @@ interface StoreProductCardProps {
   customImage?: string;
   onBuy: (product: StoreProductItem, tier: LiorahPackageTier) => void;
   onOpenDemo: (product: StoreProductItem) => void;
-  onUploadThumbnail?: (productId: string, fileDataUrl: string) => void;
-  onResetThumbnail?: (productId: string) => void;
 }
 
 export const StoreProductCard: React.FC<StoreProductCardProps> = ({
@@ -32,21 +30,7 @@ export const StoreProductCard: React.FC<StoreProductCardProps> = ({
   customImage,
   onBuy,
   onOpenDemo,
-  onUploadThumbnail,
-  onResetThumbnail,
 }) => {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result as string;
-      if (dataUrl && onUploadThumbnail) {
-        onUploadThumbnail(product.id, dataUrl);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
   return (
     <div className="group flex flex-col justify-between text-center bg-[#FFFDF9] rounded-2xl p-4 transition-all duration-300 hover:shadow-md border border-transparent hover:border-[#E5D7C5]">
       {/* Mockup Presentation Container: Dual Mockup / Smartphone presentation */}
@@ -63,9 +47,9 @@ export const StoreProductCard: React.FC<StoreProductCardProps> = ({
           <div className="hidden sm:flex flex-col items-center justify-center w-[130px] h-[240px] bg-[#FFFDF9] rounded-2xl border border-[#E5D7C5] shadow-md p-3 relative -rotate-3 transition-transform duration-300 group-hover/mockup:-rotate-6 group-hover/mockup:scale-105">
             {/* Top botanical/floral hint */}
             <div className="w-full h-12 rounded-lg bg-[#FAF6F0] overflow-hidden mb-auto flex items-center justify-center relative">
-              {product.coverImage ? (
+              {customImage || product.coverImage ? (
                 <img
-                  src={product.coverImage}
+                  src={customImage || product.coverImage}
                   alt={product.name}
                   className="w-full h-full object-cover opacity-80"
                 />
@@ -107,34 +91,6 @@ export const StoreProductCard: React.FC<StoreProductCardProps> = ({
               <WebPageScreenMockup product={product} customImage={customImage} />
             </div>
           </div>
-        </div>
-
-        {/* Custom Thumbnail Upload Controls */}
-        <div
-          className="absolute top-3 left-3 z-20 flex items-center gap-1.5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <label className="inline-flex items-center gap-1 bg-[#FFFDF9]/95 hover:bg-[#FFFDF9] text-[#1A1A1A] px-2.5 py-1 rounded-full text-[10px] font-semibold border border-[#E5D7C5] shadow-xs cursor-pointer transition-all hover:border-[#C5A059]">
-            <Camera className="w-3 h-3 text-[#C5A059]" />
-            <span>{customImage ? 'Cambiar foto' : 'Subir foto'}</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </label>
-
-          {customImage && (
-            <button
-              type="button"
-              onClick={() => onResetThumbnail?.(product.id)}
-              className="p-1 rounded-full bg-[#FFFDF9] border border-[#E5D7C5] text-[#A39589] hover:text-red-500 shadow-xs cursor-pointer"
-              title="Restaurar diseño web original"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-          )}
         </div>
 
         {/* Live URL badge if it's an official active site */}

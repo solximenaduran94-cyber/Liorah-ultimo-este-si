@@ -20,7 +20,7 @@ export const WebPageScreenMockup: React.FC<WebPageScreenMockupProps> = ({ produc
     return `liorah.site/${product.id.replace('prod-', '')}`;
   };
 
-  // If a custom thumbnail image was uploaded by the user:
+  // If a custom image was previously uploaded by the user:
   if (customImage) {
     return (
       <div className="w-full h-full relative overflow-hidden bg-stone-900 flex flex-col justify-between select-none">

@@ -111,43 +111,19 @@ export const StoreCatalogSection: React.FC<StoreCatalogSectionProps> = ({
   onBuyProduct,
   onOpenLiveDemo,
 }) => {
-  // Local state for user-uploaded thumbnails with localStorage persistence
-  const [customThumbnails, setCustomThumbnails] = useState<Record<string, string>>(() => {
+  // Read previously uploaded custom thumbnails from localStorage
+  const [customThumbnails] = useState<Record<string, string>>(() => {
     try {
-      const saved = localStorage.getItem('liorah_custom_thumbnails');
+      const saved =
+        localStorage.getItem('liorah_custom_thumbnails') ||
+        localStorage.getItem('custom_thumbnails') ||
+        localStorage.getItem('aura_custom_thumbnails');
       return saved ? JSON.parse(saved) : {};
     } catch (e) {
-      console.error('Error reading custom thumbnails from localStorage', e);
+      console.error('Error reading saved custom thumbnails from localStorage', e);
       return {};
     }
   });
-
-  const handleUploadThumbnail = (productId: string, fileDataUrl: string) => {
-    setCustomThumbnails((prev) => {
-      const updated = { ...prev, [productId]: fileDataUrl };
-      try {
-        localStorage.setItem('liorah_custom_thumbnails', JSON.stringify(updated));
-      } catch (e) {
-        console.error('Error saving thumbnail to localStorage', e);
-      }
-      return updated;
-    });
-  };
-
-  const handleResetThumbnail = (productId: string) => {
-    setCustomThumbnails((prev) => {
-      const updated = { ...prev };
-      delete updated[productId];
-      try {
-        localStorage.setItem('liorah_custom_thumbnails', JSON.stringify(updated));
-      } catch (e) {
-        console.error('Error removing thumbnail from localStorage', e);
-      }
-      return updated;
-    });
-  };
-
-  const customCount = Object.keys(customThumbnails).length;
 
   // Filter products by selected category
   const filteredProducts = STORE_PRODUCTS.filter((p) => {
@@ -164,21 +140,6 @@ export const StoreCatalogSection: React.FC<StoreCatalogSectionProps> = ({
             Los más elegidos
           </h2>
           <div className="w-12 h-[1px] bg-[#C5A059] mx-auto mt-3" />
-
-          {/* User Customization Indicator */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-2 bg-[#FAF6F0] border border-[#E5D7C5] px-3.5 py-1.5 rounded-full text-xs text-[#6B5E54] shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-[#C5A059]" />
-              <span>
-                Personalizá las miniaturas: hacé click en <strong>«Subir foto»</strong> en cada celular para cargar tus capturas
-              </span>
-            </div>
-            {customCount > 0 && (
-              <span className="text-[11px] font-semibold text-[#C5A059] bg-[#C5A059]/10 px-2.5 py-1 rounded-full border border-[#C5A059]/20">
-                {customCount} foto{customCount > 1 ? 's' : ''} personalizada{customCount > 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
         </div>
 
         {/* 2 or 3-Column Product Grid matching Page 1 & 2 */}
@@ -190,8 +151,6 @@ export const StoreCatalogSection: React.FC<StoreCatalogSectionProps> = ({
               customImage={customThumbnails[prod.id]}
               onBuy={onBuyProduct}
               onOpenDemo={onOpenLiveDemo}
-              onUploadThumbnail={handleUploadThumbnail}
-              onResetThumbnail={handleResetThumbnail}
             />
           ))}
         </div>
