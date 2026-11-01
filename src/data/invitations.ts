@@ -1,6 +1,6 @@
 import { InvitationDesign } from '../types';
 
-export const HERO_IMAGE = '/src/assets/images/hero_invitations_showcase_1793110945156.jpg';
+export const HERO_IMAGE = '/images/hero_invitations_showcase_1793110945156.jpg';
 
 export const INVITATION_CATALOG: InvitationDesign[] = [
   {
@@ -9,7 +9,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'Bodas',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/invitation_wedding_botanical_1793110946314.jpg',
+    image: '/images/invitation_wedding_botanical_1793110946314.jpg',
     badge: 'Más Vendido',
     tagline: 'Follaje botánico sereno con destellos dorados y tipografía serif editorial',
     styleDescription: 'Diseño romántico atemporal con ilustración botánica en acuarela, caligrafía fina, tonos marfil y detalles dorados en relieve óptico.',
@@ -57,7 +57,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'XV Años',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/invitation_quinceanera_glam_1793110947149.jpg',
+    image: '/images/invitation_quinceanera_glam_1793110947149.jpg',
     badge: 'Tendencia 2026',
     tagline: 'Elegancia juvenil en oro rosado, destellos de cristal y marco floral de ensueño',
     styleDescription: 'Creación contemporánea con suaves matices palo de rosa, microdestellos brillantes y una composición fotográfica central inspirada en alta costura.',
@@ -104,7 +104,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'Baby Shower',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/invitation_babyshower_neutral_1793110947119.jpg',
+    image: '/images/invitation_babyshower_neutral_1793110947119.jpg',
     badge: 'Popular',
     tagline: 'Minimalismo cálido, algodón natural, pampas y delicada acuarela orgánica',
     styleDescription: 'Ambiente cálido y acogedor diseñado en tonos neutros arena, salvia y blanco puro. Ideal para celebraciones de maternidad gender-neutral o temáticas naturales.',
@@ -150,7 +150,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'Cumpleaños',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/invitation_birthday_luxury_1793110947503.jpg',
+    image: '/images/invitation_birthday_luxury_1793110947503.jpg',
     badge: 'Edición Noche',
     tagline: 'Fondo negro profundo con geometría dorada, destellos estelares y elegancia nocturna',
     styleDescription: 'Para fiestas memorables de 30, 40, 50 años o aniversarios. Una vibra sofisticada de cóctel de noche, champaña y fiesta exclusiva.',
@@ -195,7 +195,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'Bautizo',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/hero_invitations_showcase_1793110945156.jpg',
+    image: '/images/hero_invitations_showcase_1793110945156.jpg',
     tagline: 'Pureza angelical con monograma en foil de oro, flores blancas y sello de cera',
     styleDescription: 'Un diseño sacro e impecable para Bautizos y Primeras Comuniones. Estética limpia con tipografía caligráfica clásica y detalles dorados sutiles.',
     paletteColors: ['#F7F5F0', '#C9A86A', '#9B8E7D', '#FFFFFF'],
@@ -238,7 +238,7 @@ export const INVITATION_CATALOG: InvitationDesign[] = [
     category: 'Graduación',
     price: 60000,
     originalPrice: 75000,
-    image: '/src/assets/images/hero_invitations_showcase_1793110945156.jpg',
+    image: '/images/hero_invitations_showcase_1793110945156.jpg',
     tagline: 'Azul medianoche majestuoso con emblema académico de laurel en oro brillante',
     styleDescription: 'Diseñado para graduaciones universitarias, maestrías y galas académicas. Porte institucional y distinguido.',
     paletteColors: ['#1B263B', '#D4AF37', '#E0E1DD', '#0D1B2A'],

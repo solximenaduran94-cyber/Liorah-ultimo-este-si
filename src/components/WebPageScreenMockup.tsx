@@ -58,7 +58,7 @@ export const WebPageScreenMockup: React.FC<WebPageScreenMockupProps> = ({ produc
         <div className="relative pt-2 px-3">
           <div className="w-full h-12 rounded-xl overflow-hidden shadow-xs relative">
             <img
-              src="/src/assets/images/sample_celeste_blue_quince_1793112043361.jpg"
+              src="/images/sample_celeste_blue_quince_1793112043361.jpg"
               alt="Celeste"
               className="w-full h-full object-cover"
             />
@@ -118,7 +118,7 @@ export const WebPageScreenMockup: React.FC<WebPageScreenMockupProps> = ({ produc
         <div className="relative pt-2 px-3">
           <div className="w-full h-12 rounded-xl overflow-hidden shadow-xs relative">
             <img
-              src="/src/assets/images/sample_cecilia_ariel_wedding_1793112044080.jpg"
+              src="/images/sample_cecilia_ariel_wedding_1793112044080.jpg"
               alt="Ariel & Cecilia"
               className="w-full h-full object-cover"
             />
@@ -178,7 +178,7 @@ export const WebPageScreenMockup: React.FC<WebPageScreenMockupProps> = ({ produc
         <div className="relative pt-2 px-3">
           <div className="w-full h-12 rounded-xl overflow-hidden shadow-xs relative">
             <img
-              src="/src/assets/images/invitation_wedding_botanical_1793110946314.jpg"
+              src="/images/invitation_wedding_botanical_1793110946314.jpg"
               alt="Greenery"
               className="w-full h-full object-cover"
             />
@@ -234,7 +234,7 @@ export const WebPageScreenMockup: React.FC<WebPageScreenMockupProps> = ({ produc
         <div className="pt-2 px-3">
           <div className="w-full h-12 rounded-xl overflow-hidden shadow-xs relative">
             <img
-              src="/src/assets/images/sample_olivia_invitation_1793130348223.jpg"
+              src="/images/sample_olivia_invitation_1793130348223.jpg"
               alt="Olivia"
               className="w-full h-full object-cover"
             />
